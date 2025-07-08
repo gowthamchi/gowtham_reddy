@@ -1,0 +1,10 @@
+workflow-aggregator
+workflow-job
+workflow-cps
+workflow-api
+git
+git-client
+pipeline-stage-view
+pipeline-model-definition
+pipeline-groovy-lib
+script-security
