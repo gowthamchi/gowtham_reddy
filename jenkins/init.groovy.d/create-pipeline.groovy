@@ -1,23 +1,41 @@
 import jenkins.model.*
-import hudson.model.*
+import org.jenkinsci.plugins.workflow.job.*
+import org.jenkinsci.plugins.workflow.cps.*
 import hudson.model.Cause
 
 def instance = Jenkins.getInstance()
-def jobName = "my-freestyle-job"
+def jobName = "my-pipeline-job"
 
 if (instance.getItem(jobName) == null) {
-    def job = instance.createProject(FreeStyleProject, jobName)
+    def job = instance.createProject(WorkflowJob, jobName)
 
-    // Add a basic shell command
-    def shellStep = new hudson.tasks.Shell("echo Hello from Freestyle Job!")
-    job.getBuildersList().add(shellStep)
+    def pipelineScript = """
+        pipeline {
+            agent any
+            stages {
+                stage('Build') {
+                    steps {
+                        echo 'Building...'
+                    }
+                }
+                stage('Test') {
+                    steps {
+                        echo 'Testing...'
+                    }
+                }
+                stage('Deploy') {
+                    steps {
+                        echo 'Deploying...'
+                    }
+                }
+            }
+        }
+    """.stripIndent()
 
-    // Enable concurrent/manual builds
-    job.setConcurrentBuild(true)
-
-    // Save the job config
+    def definition = new CpsFlowDefinition(pipelineScript, true)
+    job.setDefinition(definition)
     job.save()
 
-    // Trigger the first build automatically
+    // Trigger first build
     job.scheduleBuild(new Cause.UserIdCause())
 }
